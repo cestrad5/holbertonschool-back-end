@@ -7,24 +7,24 @@ from sys import argv
 if __name__ == '__main__':
     API_URL = 'https://jsonplaceholder.typicode.com'
 
-    user_id = argv[1]
-    response = \
-        requests.get(
-            f'{API_URL}/users/{user_id}/todos',
-            params={'_expand': 'user'}
-        )
+    todos = requests.get("https://jsonplaceholder.typicode.com/users/{}/todos"
+                         .format(argv[1]))
+    data_user = requests.get("https://jsonplaceholder.typicode.com/users/{}"
+                             .format(argv[1]))
 
-    if response.status_code == 200:
-        data = response.json()
-        EMPLOYEE_NAME = data[0]['user']['EMPLOYEE_NAME']
-        tasks_done = [task for task in data if task['completed']]
-        NUMBER_OF_DONE_TASKS = len(tasks_done)
-        TOTAL_NUMBER_OF_TASKS = len(data)
+    task_done = 0
+    all_tasks = 0
+    task_done_list = []
 
-        first_str = f"Employee {EMPLOYEE_NAME} is done with tasks"
+    for task in todos.json():
+        all_tasks += 1
+        if task['completed'] is True:
+            task_done += 1
+            task_done_list.append(task['title'])
 
-        print(f"{first_str}({NUMBER_OF_DONE_TASKS}/{TOTAL_NUMBER_OF_TASKS}):")
-        for task in tasks_done:
-            print(f"\t {task['title']}")
-    else:
-        print(f"Error: {response.status_code}")
+    employee_name = data_user.json()['name']
+    print("Employee {} is done with tasks({}/{}):"
+          .format(employee_name, task_done, all_tasks))
+
+    for task in task_done_list:
+        print("\t {}".format(task))
