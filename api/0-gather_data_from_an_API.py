@@ -4,27 +4,23 @@
 import requests
 from sys import argv
 
-if __name__ == '__main__':
-    API_URL = 'https://jsonplaceholder.typicode.com'
 
-    todos = requests.get("https://jsonplaceholder.typicode.com/users/{}/todos"
-                         .format(argv[1]))
-    data_user = requests.get("https://jsonplaceholder.typicode.com/users/{}"
-                             .format(argv[1]))
+if __name__ == "__main__":
+    API_URL = "https://jsonplaceholder.typicode.com/"
 
-    task_done = 0
-    all_tasks = 0
-    task_done_list = []
+    user_id = argv[1]
+    response = requests.get("{}users/{}/todos".format(API_URL, user_id),
+                            params={"_expand": "user"})
 
-    for task in todos.json():
-        all_tasks += 1
-        if task['completed'] is True:
-            task_done += 1
-            task_done_list.append(task['title'])
+    if response.status_code == 200:
+        data = response.json()
+        name = data[0]["user"]["name"]
+        task_done = [task for task in data if task["completed"]]
 
-    employee_name = data_user.json()['name']
-    print("Employee {} is done with tasks({}/{}):"
-          .format(employee_name, task_done, all_tasks))
+        print("Employee {} is done with tasks({}/{}):".format(
+            name, len(task_done), len(data)))
+        for task in task_done:
+            print("\t {}".format(task["title"]))
 
-    for task in task_done_list:
-        print("\t {}".format(task))
+    else:
+        print("Error: {}".format(response.status_code))
