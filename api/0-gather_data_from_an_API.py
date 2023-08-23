@@ -1,34 +1,56 @@
 #!/usr/bin/python3
-"""Script to use a REST API for a given employee ID, returns
-information about his/her TODO list progress"""
-import requests
+
 import sys
+import requests
+
+
+def fetch_user_info(employee_id):
+    base_url = "https://jsonplaceholder.typicode.com"
+    user_url = f"{base_url}/users/{employee_id}"
+
+    response = requests.get(user_url)
+    user_info = response.json()
+
+    return user_info
+
+
+def fetch_employee_todo_progress(employee_id):
+    base_url = "https://jsonplaceholder.typicode.com"
+    todo_url = f"{base_url}/todos?userId={employee_id}"
+
+    response = requests.get(todo_url)
+    todo_list = response.json()
+
+    total_tasks = len(todo_list)
+    completed_tasks = sum(task['completed'] for task in todo_list)
+
+    return completed_tasks, total_tasks, todo_list
+
+
+def main():
+    if len(sys.argv) != 2:
+        print("Usage: python script.py <employee_id>")
+        return
+
+    employee_id = int(sys.argv[1])
+
+    try:
+        user_info = fetch_user_info(employee_id)
+        employee_name = user_info['name']
+    except KeyError:
+        print(f"Employee with ID {employee_id} not found.")
+        return
+
+    completed_tasks, total_tasks, todo_list = fetch_employee_todo_progress(
+        employee_id)
+
+    print(
+        f"Employee {employee_name} is done with tasks ({completed_tasks}/{total_tasks}):")
+
+    for task in todo_list:
+        if task['completed']:
+            print(f"\t{task['title']}")
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print(f"UsageError: python3 {__file__} employee_id(int)")
-        sys.exit(1)
-
-    API_URL = "https://jsonplaceholder.typicode.com"
-    EMPLOYEE_ID = sys.argv[1]
-
-    response = requests.get(
-        f"{API_URL}/users/{EMPLOYEE_ID}/todos",
-        params={"_expand": "user"}
-    )
-    data = response.json()
-
-    if not len(data):
-        print("RequestError:", 404)
-        sys.exit(1)
-
-    employee_name = data[0]["user"]["name"]
-    total_tasks = len(data)
-    done_tasks = [task for task in data if task["completed"]]
-    total_done_tasks = len(done_tasks)
-
-    print(f"Employee {employee_name} is done with tasks"
-          f"({total_done_tasks}/{total_tasks}):")
-    for task in done_tasks:
-        print(f"\t {task['title']}")
+    main()
