@@ -16,14 +16,14 @@ if __name__ == '__main__':
 
     if response.status_code == 200:
         data = response.json()
-        name = data[0]['user']['name']
+        EMPLOYEE_NAME = data[0]['user']['EMPLOYEE_NAME']
         tasks_done = [task for task in data if task['completed']]
-        num_tasks_done = len(tasks_done)
-        num_tasks_total = len(data)
+        NUMBER_OF_DONE_TASKS = len(tasks_done)
+        TOTAL_NUMBER_OF_TASKS = len(data)
 
-        first_str = f"Employee {name} is done with tasks"
+        first_str = f"Employee {EMPLOYEE_NAME} is done with tasks"
 
-        print(f"{first_str}({num_tasks_done}/{num_tasks_total}):")
+        print(f"{first_str}({NUMBER_OF_DONE_TASKS}/{TOTAL_NUMBER_OF_TASKS}):")
         for task in tasks_done:
             print(f"\t {task['title']}")
     else:
