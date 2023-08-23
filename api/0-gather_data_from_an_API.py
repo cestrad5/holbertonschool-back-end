@@ -1,25 +1,25 @@
 #!/usr/bin/python3
-"""Gather data from an API"""
+""" Task 0 """
 
-import requests
-from sys import argv
 
-if __name__ == "__main__":
-    API_URL = "https://jsonplaceholder.typicode.com/"
+if __name__ == '__main__':
+    import requests
+    import sys
 
-    user_id = argv[1]
-    response = requests.get("{}users/{}/todos".format(API_URL, user_id),
-                            params={"_expand": "user"})
+    if len(sys.argv) != 2:
+        print("Enter a valid number")
+        sys.exit()
 
-    if response.status_code == 200:
-        data = response.json()
-        name = data[0]["user"]["name"]
-        task_done = [task for task in data if task["completed"]]
+    taskId = sys.argv[1]
 
-        print("Employee {} is done with tasks({}/{}):".format(
-            name, len(task_done), len(data)))
-        for task in task_done:
-            print("\t {}".format(task["title"]))
+    userTasks = requests.get(
+        f'https://jsonplaceholder.typicode.com/users/{taskId}/todos').json()
+    userInfo = requests.get(
+        f'https://jsonplaceholder.typicode.com/users/{taskId}').json()
 
-    else:
-        print("Error: {}".format(response.status_code))
+    userName = userInfo.get('name')
+    completedTasks = [todo for todo in userTasks if todo['completed']]
+    print(f"Employee {userName} is done with"
+          f" tasks({len(completedTasks)}/{len(userTasks)}):")
+    for task in completedTasks:
+        print(f"\t {task.get('title')}")
