@@ -1,27 +1,35 @@
 #!/usr/bin/python3
-"""Script to use a REST API, returns information about
-all tasks from all employees and export in JSON"""
+"""Task 3"""
+
 import json
 import requests
 
 
 if __name__ == "__main__":
-    API_URL = "https://jsonplaceholder.typicode.com"
+    API_URL = "https://jsonplaceholder.typicode.com/"
 
-    users = requests.get(f"{API_URL}/users").json()
+    response = requests.get("{}todos".format(API_URL),
+                            params={"_expand": "user"})
 
-    dict_users_tasks = {}
-    for user in users:
-        tasks = requests.get(f"{API_URL}/users/{user['id']}/todos").json()
+    if response.status_code == 200:
+        data = response.json()
 
-        dict_users_tasks[user["id"]] = []
-        for task in tasks:
-            task_dict = {
-                "username": user["username"],
-                "task": task["title"],
-                "completed": task["completed"]
-            }
-            dict_users_tasks[user["id"]].append(task_dict)
+        dict_employed = {}
 
-    with open("todo_all_employees.json", "w") as file:
-        json.dump(dict_users_tasks, file)
+        for task in data:
+            dict_employed[task["userId"]] = []
+
+        json_filename = "todo_all_employees.json"
+        with open(json_filename, mode="w", encoding="utf-8") as json_file:
+            for task in data:
+                dict_temp = {
+                    "task": task["title"],
+                    "completed": task["completed"],
+                    "username": task["user"]["username"]
+                }
+                dict_employed[task["userId"]].append(dict_temp)
+
+            json.dump(dict_employed, json_file)
+
+    else:
+        print("Error: {}".format(response.status_code))

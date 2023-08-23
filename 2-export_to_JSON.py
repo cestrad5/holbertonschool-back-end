@@ -1,36 +1,36 @@
 #!/usr/bin/python3
 """Task 2"""
+
+
 import json
 import requests
-import sys
+from sys import argv
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print(f"UsageError: python3 {__file__} employee_id(int)")
-        sys.exit(1)
+    API_URL = "https://jsonplaceholder.typicode.com/"
 
-    API_URL = "https://jsonplaceholder.typicode.com"
-    EMPLOYEE_ID = sys.argv[1]
+    user_id = argv[1]
+    response = requests.get("{}users/{}/todos".format(API_URL, user_id),
+                            params={"_expand": "user"})
 
-    response = requests.get(
-        f"{API_URL}/users/{EMPLOYEE_ID}/todos",
-        params={"_expand": "user"}
-    )
-    data = response.json()
+    if response.status_code == 200:
+        data = response.json()
 
-    if not len(data):
-        print("RequestError:", 404)
-        sys.exit(1)
+        dict_employed = {user_id: []}
 
-    user_tasks = {EMPLOYEE_ID: []}
-    for task in data:
-        task_dict = {
-            "task": task["title"],
-            "completed": task["completed"],
-            "username": task["user"]["username"]
-        }
-        user_tasks[EMPLOYEE_ID].append(task_dict)
+        json_filename = "{}.json".format(user_id)
+        with open(json_filename, mode="w", encoding="utf-8") as json_file:
+            for task in data:
+                dict_temp = {
+                    "task": task["title"],
+                    "completed": task["completed"],
+                    "username": task["user"]["username"]
+                }
+                dict_employed[user_id].append(dict_temp)
 
-    with open(f"{EMPLOYEE_ID}.json", "w") as file:
-        json.dump(user_tasks, file)
+            json.dump(dict_employed, json_file)
+            print("{}".format(response.status_code))
+    else:
+        print("Error: {}".format(response.status_code))
+
