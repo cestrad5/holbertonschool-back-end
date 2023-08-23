@@ -1,25 +1,15 @@
 #!/usr/bin/python3
 """ Task 0 """
 
+import requests
+import sys
 
-if __name__ == '__main__':
-    import requests
-    import sys
+if __name__ == "__main__":
+    url = "https://jsonplaceholder.typicode.com/"
+    user = requests.get(url + "users/{}".format(sys.argv[1])).json()
+    todos = requests.get(url + "todos", params={"userId": sys.argv[1]}).json()
 
-    if len(sys.argv) != 2:
-        print("Enter a valid number")
-        sys.exit()
-
-    taskId = sys.argv[1]
-
-    userTasks = requests.get(
-        f'https://jsonplaceholder.typicode.com/users/{taskId}/todos').json()
-    userInfo = requests.get(
-        f'https://jsonplaceholder.typicode.com/users/{taskId}').json()
-
-    userName = userInfo.get('name')
-    completedTasks = [todo for todo in userTasks if todo['completed']]
-    print(f"Employee {userName} is done with"
-          f" tasks({len(completedTasks)}/{len(userTasks)}):")
-    for task in completedTasks:
-        print(f"\t {task.get('title')}")
+    completed = [t.get("title") for t in todos if t.get("completed") is True]
+    print("Employee {} is done with tasks({}/{}):".format(
+        user.get("name"), len(completed), len(todos)))
+    [print("\t {}".format(c)) for c in completed]
