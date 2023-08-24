@@ -33,4 +33,3 @@ if __name__ == "__main__":
             print("{}".format(response.status_code))
     else:
         print("Error: {}".format(response.status_code))
-
